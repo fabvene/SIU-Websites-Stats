@@ -1,11 +1,10 @@
 library(RGoogleAnalytics)
 library(lubridate)
 library(dplyr)
+library(ggplot2)
 
 
-#oauth_token <- Auth(client.id = "387545337049-qoon4gdvbqr2fe9l4cti4qs19sptat2p.apps.googleusercontent.com",client.secret = "xnPrepkF2vDBEcWenP56jiox")
-# Save the token object for future sessions
-#save(oauth_token, file="oauth_token")
+
 
 # Token -------------------------------------------------------------------
 
@@ -17,7 +16,7 @@ profiles <- GetProfiles(oauth_token)
 
 # Paris GA -----
 
-query.list <- Init(start.date = "2015-01-01",
+query.list <- Init(start.date = "2014-10-01",
                    end.date = "2015-09-10",
                    dimensions = "ga:date",
                    metrics = "ga:goal16Completions,ga:sessions",
@@ -50,7 +49,7 @@ source('../LeadsLoader.R')
 SF.paris.goals <- subset(all.leads, all.leads$OwnerId=="00GD0000003Gm8JMAS" & all.leads$LeadSource=="Paris Website" )
 SF.paris.goals$date <- as.Date(SF.paris.goals$CreatedDate)
 SF.paris.goals$month <- month(SF.paris.goals$date,label = TRUE)
-SF.paris.goals <- subset(SF.paris.goals, SF.paris.goals$date >"2015-01-01" )
+SF.paris.goals <- subset(SF.paris.goals, SF.paris.goals$date >"2014-10-01" )
 
 SF.paris.goals.agg <- aggregate(list(Goals=SF.paris.goals$Id), by=list(Month=SF.paris.goals$month), FUN="length")
 
@@ -70,7 +69,7 @@ pa.var <- mean(paris.compare$Var[-3])
 
 # Madrid GA -----
 
-query.list <- Init(start.date = "2015-01-01",
+query.list <- Init(start.date = "2014-10-01",
                    end.date = "2015-09-10",
                    dimensions = "ga:date",
                    metrics = "ga:goal2Completions,ga:sessions",
@@ -102,7 +101,7 @@ ma.sum <- sum(GA.madrid.goals.agg$Goals[c(1:nrow(GA.madrid.goals.agg)-1)])
 SF.madrid.goals <- subset(all.leads, all.leads$OwnerId=="00GD0000003Go7rMAC" & all.leads$LeadSource=="Madrid Website" )
 SF.madrid.goals$date <- as.Date(SF.madrid.goals$CreatedDate)
 SF.madrid.goals$month <- month(SF.madrid.goals$date,label = TRUE)
-SF.madrid.goals <- subset(SF.madrid.goals, SF.madrid.goals$date >"2015-01-01" )
+SF.madrid.goals <- subset(SF.madrid.goals, SF.madrid.goals$date >"2014-10-01" )
 
 SF.madrid.goals.agg <- aggregate(list(Goals=SF.madrid.goals$Id), by=list(Month=SF.madrid.goals$month), FUN="length")
 
@@ -123,7 +122,7 @@ ma.var <- mean(madrid.compare$Var[-3])
 
 # Heidelberg GA -----
 
-query.list <- Init(start.date = "2015-01-01",
+query.list <- Init(start.date = "2014-10-01",
                    end.date = "2015-09-10",
                    dimensions = "ga:date",
                    metrics = "ga:goal5Completions,ga:sessions",
@@ -155,7 +154,7 @@ hd.sum <- sum(GA.heidelberg.goals.agg$Goals[c(1:nrow(GA.heidelberg.goals.agg)-1)
 SF.heidelberg.goals <- subset(all.leads, all.leads$OwnerId=="00GD0000003GnllMAC" & all.leads$LeadSource=="Heidelberg Website" )
 SF.heidelberg.goals$date <- as.Date(SF.heidelberg.goals$CreatedDate)
 SF.heidelberg.goals$month <- month(SF.heidelberg.goals$date,label = TRUE)
-SF.heidelberg.goals <- subset(SF.heidelberg.goals, SF.heidelberg.goals$date >"2015-01-01" )
+SF.heidelberg.goals <- subset(SF.heidelberg.goals, SF.heidelberg.goals$date >"2014-10-01" )
 
 SF.heidelberg.goals.agg <- aggregate(list(Goals=SF.heidelberg.goals$Id), by=list(Month=SF.heidelberg.goals$month), FUN="length")
 
@@ -195,7 +194,7 @@ madrid <- c(sum(GA.madrid$sessions),sum(madrid.compare$GA), sum(madrid.compare$S
 heidelberg.REG <- subset(SF.heidelberg.goals, SF.heidelberg.goals$Status=="REG")
 heidelberg.qualy <- subset(SF.heidelberg.goals, SF.heidelberg.goals$Status %in% c("REG", "Paid Tuition","Accepted","App In"))
 
-heidelberg.compare$extrapolation <- round(heidelberg.compare$SF/.78,0) # workaround to fill in lost GA months
+heidelberg.compare$extrapolation <- round(heidelberg.compare$SF/.8,0) # workaround to fill in lost GA months
 heidelberg <- c(sum(GA.heidelberg$sessions),sum(heidelberg.compare$extrapolation), sum(heidelberg.compare$SF),nrow(heidelberg.qualy),nrow(heidelberg.REG))
 
 all <- data.frame(rbind(paris,madrid,heidelberg))
@@ -203,6 +202,15 @@ names(all) <- c("Sessions","GA","SF","Qualy","REG")
 rownames(all) <- c("Paris", "Madrid", "Heidelberg")
 
 
-all.props <- data.frame(cbind(Sessions=all$Sessions,RatetoSF=round(all$SF/all$Sessions,2),SF=all$SF,RatetoQualy=round(all$Qualy/all$SF,2),Qualy=all$Qualy))
+all.props <- data.frame(cbind(Sessions=all$Sessions,RatetoSF=round(all$SF/all$Sessions,2),SF=all$SF,SFtoQualy=round(all$Qualy/all$SF,2),Qualy=all$Qualy, SFtoREG=round(all$REG/all$SF,2), REG=all$REG))
 rownames(all.props) <- c("Paris", "Madrid", "Heidelberg")
                         
+# Plots ----------
+par(mfrow=c(1, 1), mar=c(5, 5, 4, 10))
+bp <- barplot(as.matrix(t(all)), main="European Websites", 
+        log="y" ,beside=TRUE, col=rainbow(5, start = 0, end = 0.5), 
+        legend.text = TRUE, ylab="(Log scale!)",
+        args.legend = list(x ='topright', bty='n', inset=c(-0.25,0)))
+        
+        text(bp, 50000, round(all, 1),cex=1,pos=3)
+        
