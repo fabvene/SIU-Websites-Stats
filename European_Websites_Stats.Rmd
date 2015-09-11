@@ -1,0 +1,53 @@
+---
+title: "European Website Statistics"
+author: "Fabrizio Veneziano"
+date: "10 septembre 2015"
+output: html_document
+---
+
+
+
+```{r cache=T,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+
+source('Goals - SF vs GA - 2015.R')
+
+
+```
+
+## 1. Introduction: from visits to students
+
+The following table reports relevant traffic segments from Google Analytics and Salesforce aiming at analyzing the performance of the three European websites in terms of both generated volumes and conversion rates.Specifically, it looks at the funnel from Sessions ('visits' on the website) to leads and from there to students, either actual registered ones or at least in the registration process.
+  
+    
+    
+
+```{r cache=T,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+library(printr)
+knitr::kable(all, caption = "Traffic from Sept 1, 2014 to date", booktabs=TRUE)
+
+```
+
+- **Sessions**: Google Analytics sessions (while a GA session has specific definition, these can be thought of as visits on the website)
+- **GA**: leads sent from the website according to Google Analytics
+- **SF**: leads landed in Saleforce. This figure is usually slighlty smaller than the corresponding GA columns mostly due to spam or duplicate leads (that GA validates but are rejected/erased by Reps in SF)
+- **Qualy**: qualified leads, that is leads with one of th following SF statuses: App In, Accepted, Paid Tuition, REG
+- **REG**: acutally registered students
+
+
+# 2. Performance  
+
+Let's remove the GA column from the picture (in order to focus on 'proper' leads) and introduce some conversion rates.  
+  
+  
+
+```{r cache=T,echo=FALSE,warning=FALSE,message=FALSE,error=FALSE}
+library(printr)
+knitr::kable(all.props)
+
+```
+  
+  
+  
+By introducing some conversion rates (from visits to leads (SF) and from leads to at least qualified leads) it appears that while Madrid generates the largest traffic volume (63 465 sessions in little more than 8 months), it fails to convert visits to leads at least in the same capacity of Heidelberg and Paris (1% both). A possible explanation is that the traffic on Madrid site has a **lower quality** than what Paris or Heidelberg get, with a fairly high number of visitors who are not really looking for SIU and/or its programs.  
+
+
